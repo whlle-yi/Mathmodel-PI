@@ -33,7 +33,6 @@ export function SettingsModal(): React.ReactNode {
       providers: cleaned,
       defaultModel: defaultModel || undefined,
       thinkingLevel,
-      workspaceDir: app.settings?.workspaceDir,
     });
     setKeys(cleaned);
     setSaved(true);
@@ -167,18 +166,6 @@ export function SettingsModal(): React.ReactNode {
         <section className="settings-section">
           <h3>本地环境</h3>
           <div className="env-report">
-            <div>
-              工作区目录：{app.settings?.workspaceDir}
-              <button
-                className="btn tiny ghost"
-                style={{ marginLeft: 8 }}
-                onClick={() => void window.api.selectDirectory().then((dir) => {
-                  if (dir) void window.api.setSettings({ workspaceDir: dir }).then((s) => actions.setState({ settings: s }));
-                })}
-              >
-                更改
-              </button>
-            </div>
             <div>
               Python：{app.env?.python.found ? `✓ ${app.env.python.path}` : "✗ 未检测到"}
               {app.env?.python.found && !app.env.python.bundled && "（来自系统，建议保持已安装 numpy/pandas 等库）"}

@@ -61,7 +61,15 @@ export function ProjectsMenu(): React.ReactNode {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
-              <button className="btn ghost" onClick={() => void window.api.selectDirectory().then(setParentDir)}>
+              <button
+                className="btn ghost"
+                onClick={() => {
+                  // 默认定位到上一个项目所在的父目录（跟随使用痕迹）
+                  const last = app.settings?.recentProjects[0];
+                  const fallback = last ? last.split(/[\\/]/).slice(0, -1).join("\\") : undefined;
+                  void window.api.selectDirectory(fallback).then(setParentDir);
+                }}
+              >
                 {parentDir ? `位置：${parentDir}` : "选择保存位置"}
               </button>
               <button className="btn primary" disabled={!parentDir || !name.trim()} onClick={() => void handleCreate()}>

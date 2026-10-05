@@ -1,5 +1,5 @@
 import { app } from "electron";
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import type { AppSettings } from "@shared/types";
 
@@ -16,7 +16,6 @@ const DEFAULT_SETTINGS: AppSettings = {
   skillDirs: [],
   recentProjects: [],
   onboardingDone: false,
-  workspaceDir: "D:\\Mathmodel-PI-Workspace",
 };
 
 let cached: AppSettings | null = null;
@@ -33,16 +32,7 @@ export function loadSettings(): AppSettings {
   } catch {
     cached = { ...DEFAULT_SETTINGS };
   }
-  // 工作区目录兜底：不存在则自动创建（D 盘不可用时退回用户目录）
-  const ws = cached as AppSettings;
-  if (!ws.workspaceDir) ws.workspaceDir = DEFAULT_SETTINGS.workspaceDir;
-  try {
-    mkdirSync(ws.workspaceDir, { recursive: true });
-  } catch {
-    ws.workspaceDir = join(app.getPath("home"), "Mathmodel-PI-Workspace");
-    mkdirSync(ws.workspaceDir, { recursive: true });
-  }
-  return ws;
+  return cached as AppSettings;
 }
 
 export function saveSettings(patch: Partial<AppSettings>): AppSettings {

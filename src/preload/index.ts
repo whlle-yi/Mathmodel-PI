@@ -21,6 +21,7 @@ const api: Api = {
   // 对话（主界面）
   listChatSessions: () => ipcRenderer.invoke("chat:list"),
   createChatSession: (cwd) => ipcRenderer.invoke("chat:create", cwd),
+  setChatCwd: (id, cwd) => ipcRenderer.invoke("chat:setCwd", id, cwd),
   deleteChatSession: (id) => ipcRenderer.invoke("chat:delete", id),
   getChatTranscript: (id) => ipcRenderer.invoke("chat:transcript", id),
   chatSend: (id, text) => ipcRenderer.invoke("chat:send", id, text),
@@ -34,7 +35,7 @@ const api: Api = {
   kbDeleteSource: (id) => ipcRenderer.invoke("kb:delete", id),
 
   // 项目管理
-  selectDirectory: () => ipcRenderer.invoke("project:selectDir"),
+  selectDirectory: (defaultPath) => ipcRenderer.invoke("project:selectDir", defaultPath),
   selectProblemFile: () => ipcRenderer.invoke("project:selectProblemFile"),
   createProject: (parentDir, name) => ipcRenderer.invoke("project:create", parentDir, name),
   listRecentProjects: () => ipcRenderer.invoke("project:listRecent"),

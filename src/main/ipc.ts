@@ -99,7 +99,7 @@ export function registerIpcHandlers(): void {
     allowProjectRoot(path);
     return { path };
   });
-  ipcMain.handle("project:selectDir", () => selectDirectory());
+  ipcMain.handle("project:selectDir", (_e, defaultPath?: string) => selectDirectory(defaultPath));
   ipcMain.handle("project:selectProblemFile", () => selectProblemFile());
   ipcMain.handle("project:listRecent", () => loadSettings().recentProjects);
   ipcMain.handle("project:open", (_e, projectPath: string) => {
@@ -135,9 +135,14 @@ export function registerIpcHandlers(): void {
   // ---- 对话（主界面） ------------------------------------------------------
   ipcMain.handle("chat:list", (): ChatSessionMeta[] => chat.listSessions());
   ipcMain.handle("chat:create", (_e, cwd?: string): ChatSessionMeta => {
-    const session = chat.createSession(cwd ?? loadSettings().workspaceDir);
+    const session = chat.createSession(cwd ?? chat.defaultCwd());
     registerAllowedRoot(session.cwd);
     return session;
+  });
+  ipcMain.handle("chat:setCwd", (_e, id: string, cwd: string): ChatSessionMeta => {
+    const meta = chat.setCwd(id, cwd);
+    registerAllowedRoot(cwd);
+    return meta;
   });
   ipcMain.handle("chat:delete", (_e, id: string) => chat.deleteSession(id));
   ipcMain.handle("chat:transcript", (_e, id: string): ChatLine[] => chat.getTranscript(id));

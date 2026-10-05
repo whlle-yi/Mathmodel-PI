@@ -114,6 +114,29 @@ export class ChatService {
     return meta;
   }
 
+  /** 会话未开始对话前允许改工作目录（一旦有消息，pi 会话已绑定 cwd，不可改） */
+  setCwd(id: string, cwd: string): ChatSessionMeta {
+    if (this.active.has(id)) throw new Error("会话执行中，不能更改工作目录");
+    const lines = this.loadTranscript(id);
+    if (lines.some((l) => l.role === "user" || l.role === "assistant")) {
+      throw new Error("会话已开始，不能更改工作目录；请新建对话");
+    }
+    const sessions = this.loadIndex();
+    const meta = sessions.find((s) => s.id === id);
+    if (!meta) throw new Error("会话不存在");
+    meta.cwd = cwd;
+    this.saveIndex(sessions);
+    this.emit({ type: "sessions", sessions: this.listSessions() });
+    return meta;
+  }
+
+  /** 新会话的默认工作目录：上次使用过的（最近会话）→ 用户目录惰性兜底 */
+  defaultCwd(): string {
+    const last = this.loadIndex().sort((a, b) => b.updatedAt - a.updatedAt)[0];
+    if (last?.cwd) return last.cwd;
+    return join(app.getPath("documents"), "Mathmodel-PI");
+  }
+
   deleteSession(id: string): void {
     if (this.active.has(id)) throw new Error("会话正在执行中，请先停止");
     rmSync(this.transcriptPath(id), { force: true });

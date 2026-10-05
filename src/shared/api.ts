@@ -58,7 +58,10 @@ export interface Api {
 
   // 对话（主界面）
   listChatSessions(): Promise<ChatSessionMeta[]>;
+  /** 不传 cwd 时使用“上次使用的文件夹”，全新用户兜底到用户目录 */
   createChatSession(cwd?: string): Promise<ChatSessionMeta>;
+  /** 会话尚未开始对话时可更改工作目录 */
+  setChatCwd(id: string, cwd: string): Promise<ChatSessionMeta>;
   deleteChatSession(id: string): Promise<void>;
   getChatTranscript(id: string): Promise<ChatLine[]>;
   chatSend(id: string, text: string): Promise<void>;
@@ -72,7 +75,7 @@ export interface Api {
   kbDeleteSource(id: string): Promise<void>;
 
   // 项目管理（工作流视图）
-  selectDirectory(): Promise<string | null>;
+  selectDirectory(defaultPath?: string): Promise<string | null>;
   selectProblemFile(): Promise<string | null>;
   createProject(parentDir: string, name: string): Promise<{ path: string }>;
   listRecentProjects(): Promise<string[]>;

@@ -55,9 +55,32 @@ export function ChatView(): React.ReactNode {
     <main className="chat-view">
       <header className="chat-header">
         <span className="chat-title">{session?.title ?? "新对话"}</span>
-        <span className="muted tiny">
-          {app.env?.python.found ? "Python ✓" : "Python ✗"} · {app.env?.xelatex.found ? "XeLaTeX ✓" : "XeLaTeX ⚠"} ·
-          工作区 {session?.cwd ?? app.settings?.workspaceDir}
+        {session && (
+          <span className="chat-cwd" title={session.cwd}>
+            📁 {session.cwd}
+            {app.chatItems.length === 0 && (
+              <button
+                className="btn tiny ghost"
+                onClick={() =>
+                  void window.api.selectDirectory().then((dir) => {
+                    if (!dir) return;
+                    window.api
+                      .setChatCwd(session.id, dir)
+                      .then((meta) => {
+                        const sessions = app.chatSessions.map((s) => (s.id === meta.id ? meta : s));
+                        actions.setState({ chatSessions: sessions });
+                      })
+                      .catch((err) => alert(err instanceof Error ? err.message : String(err)));
+                  })
+                }
+              >
+                更改
+              </button>
+            )}
+          </span>
+        )}
+        <span className="muted tiny" style={{ marginLeft: "auto" }}>
+          {app.env?.python.found ? "Python ✓" : "Python ✗"} · {app.env?.xelatex.found ? "XeLaTeX ✓" : "XeLaTeX ⚠"}
         </span>
       </header>
 

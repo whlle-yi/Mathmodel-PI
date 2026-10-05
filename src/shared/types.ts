@@ -140,8 +140,6 @@ export interface AppSettings {
   recentProjects: string[];
   /** 首次引导是否完成 */
   onboardingDone: boolean;
-  /** 对话/项目的工作区目录（用户指定；默认在 D 盘根目录创建） */
-  workspaceDir: string;
 }
 
 /** 预览文件类型 */

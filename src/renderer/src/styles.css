@@ -186,6 +186,18 @@ h1, h2, h3 { letter-spacing: 0.2px; }
 
 .chat-title { font-weight: 600; font-size: 15px; }
 
+.chat-cwd {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  max-width: 380px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .chat-scroll {
   flex: 1;
   overflow-y: auto;
