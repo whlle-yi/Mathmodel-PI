@@ -1,4 +1,5 @@
 import { app, dialog, ipcMain, BrowserWindow } from "electron";
+import { join } from "node:path";
 import { ModelRuntime } from "@earendil-works/pi-coding-agent";
 import type { ChatEvent, ChatLine } from "@shared/api";
 import type {
@@ -58,7 +59,9 @@ function allowProjectRoot(projectPath: string): void {
 
 async function listModels(): Promise<ModelInfo[]> {
   const settings = loadSettings();
-  const runtime = await ModelRuntime.create();
+  const runtime = await ModelRuntime.create({
+    authPath: join(app.getPath("userData"), "pi-agent", "auth.json"),
+  });
   for (const [provider, key] of Object.entries(settings.providers)) {
     if (key) runtime.setRuntimeApiKey(provider, key);
   }

@@ -130,8 +130,11 @@ export interface CreateMMSessionOptions {
 export async function createMMSession(opts: CreateMMSessionOptions): Promise<AgentSession> {
   const settings = loadSettings();
 
-  // 1. 模型运行时：注入用户在各 provider 下配置的 API Key
-  const modelRuntime = await ModelRuntime.create();
+  // 1. 模型运行时：注入用户在各 provider 下配置的 API Key。
+  //    凭据存储隔离到应用私有目录（不读用户 pi CLI 的 ~/.pi/agent/auth.json）；
+  //    各 provider 的标准环境变量（如 DEEPSEEK_API_KEY）仍按 pi 约定生效
+  const authPath = join(app.getPath("userData"), "pi-agent", "auth.json");
+  const modelRuntime = await ModelRuntime.create({ authPath });
   for (const [provider, key] of Object.entries(settings.providers)) {
     if (key) modelRuntime.setRuntimeApiKey(provider, key);
   }
