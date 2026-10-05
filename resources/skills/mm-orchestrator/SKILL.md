@@ -67,7 +67,7 @@ description: 全国大学生数学建模竞赛（CUMCM）全流程编排入口�
 - `paper/draft-audit.md`：逐章将初稿内容标记为“保留 / 改写 / 删除 / 补充”，核对题意、最终模型、公式符号、真实结果、图件锚点、题面覆盖、占位符与模板化段落；冲突一律以上游报告、结果和 manifest 为准。
 - `paper/draft-metrics.json`：记录初稿模式、路径、SHA256、总页数/正文页数、各章起始页和可编译状态；没有初稿时仍生成并写明 `mode=none`。
 
-- `paper/structure-plan.md`（内容，由编排器建）：章节骨架 + 逐问论证链 + 预计篇幅。**章节骨架以 `mm-paper-writing/references/common-paper-rules.md` 的"整体论文骨架"与 `references/writing-order.json` 的章节清单为唯一权威**（每问独立成章、模型评价与推广单独一章这类结构编排不在此重复）；每问写清核心论证链（承接 → 建模 → 求解 → 结果表 → 结果分析）与预计篇幅，并建立"题面要求/子问题 → 正文小节 → 模型变量与约束 → 结果证据 → 最终回答"的追踪关系（供 `mm-verification` 逐项验收）。
+- `paper/structure-plan.md`（内容，由编排器建）：章节骨架 + 逐问论证链 + 预计篇幅。**章节骨架以 `mm-paper-writing/../../knowledge/writing/common-paper-rules.md` 的"整体论文骨架"与 `references/writing-order.json` 的章节清单为唯一权威**（每问独立成章、模型评价与推广单独一章这类结构编排不在此重复）；每问写清核心论证链（承接 → 建模 → 求解 → 结果表 → 结果分析）与预计篇幅，并建立"题面要求/子问题 → 正文小节 → 模型变量与约束 → 结果证据 → 最终回答"的追踪关系（供 `mm-verification` 逐项验收）。
 - `paper/page-budget.json`（机器可读预算）：`target_body_pages` 只能为 28 或 29，`allowed_range` 固定 `[27,30]`；每章记录 `min_pages/target_pages/max_pages`、真实 `source_paths` 与 `evidence_ids`，各章目标页数之和必须等于总目标。预算按问题难度和证据量分配，不平均分配、不以空泛内容补页。**注：目标页数取 28/29 是为给分页波动留余量；实际正文允许到 30 页，`check_paper_length` 以 `allowed_range` 兜底，不因低于 30 而判过预算缺陷**。
 
 正式预算使用以下内联结构（初始化时可为空，定稿时不得保留占位符）：

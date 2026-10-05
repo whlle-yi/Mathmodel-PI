@@ -1,3 +1,5 @@
+> **知识层文件** · 主要使用方：mm-modeling（选型 Step 3.5 算法适用性核查）。工作流阶段按 SKILL.md 指示整读对应小节；对话模式经 search_knowledge_base 检索引用（可只取片段）。
+
 # 算法库速查（建模选型用）
 
 按问题类型组织，每条给"适用场景 + 一句话要点 + 主要局限"。选型时结合 `model-selection-matrix.md`。

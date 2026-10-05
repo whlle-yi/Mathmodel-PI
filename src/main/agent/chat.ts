@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import type { AgentSession, AgentSessionEvent } from "@earendil-works/pi-coding-agent";
 import type { ChatMessage, ChatSessionMeta } from "@shared/types";
 import type { RunOptions } from "@shared/types";
+import { WORKFLOW_SKILLS } from "@shared/stages";
 import { loadSettings } from "../settings";
 import { createMMSession, type AskUserContext } from "./session";
 
@@ -293,7 +294,9 @@ export class ChatService {
       },
       thinkingLevel: settings.thinkingLevel,
       knowledgeBase: true,
-      excludeSkills: ["mm-orchestrator"], // 完整工作流只能从工作流视图进入
+      // 对话会话不装配任何工作流 skills：完整工作流只能从工作流视图进入，
+      // 对话靠知识层检索（内置知识 + 用户资料）获得专业能力
+      excludeSkills: WORKFLOW_SKILLS,
     });
 
     this.active.set(sessionId, session);

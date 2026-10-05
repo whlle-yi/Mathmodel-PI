@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """check_abstract_symbols.py — 摘要零数学符号 + 关键词数量机检（硬门禁，exit 0 才算 PASS）。
 
-规范（mm-paper-writing references/chapters/00-摘要.md）：
+规范（mm-paper-writing ../../knowledge/writing/chapters/00-摘要.md）：
   摘要正文不得出现行内/行间公式、独立字母变量、带上下标的变量、希腊字母、数学关系式；
   所有模型符号翻译成自然语言。白名单（不算符号）：纯阿拉伯数字、百分数、年份、
   常规计量单位、必要的化学式、首次写全称的模型英文缩写。

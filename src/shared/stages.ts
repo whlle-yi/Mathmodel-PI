@@ -22,3 +22,20 @@ export function initialStages(): StageInfo[] {
 export function isStageKey(value: string): value is StageKey {
   return STAGE_DEFS.some((s) => s.key === value);
 }
+
+/**
+ * 工作流专属 skills（对话会话不装配——完整工作流只能从工作流视图进入）。
+ * 注意 mm-model-dictionary 不在流水线阶段里，但也属于工作流体系。
+ */
+export const WORKFLOW_SKILLS = [
+  "mm-orchestrator",
+  "mm-problem-analysis",
+  "mm-modeling",
+  "mm-model-dictionary",
+  "mm-coding",
+  "mm-figures",
+  "mm-graphics",
+  "mm-paper-writing",
+  "mm-verification",
+];
+

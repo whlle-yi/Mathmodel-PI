@@ -1,3 +1,5 @@
+> **知识层文件** · 主要使用方：mm-paper-writing（G-1 必读）、mm-orchestrator（论文策划骨架权威）。工作流阶段按 SKILL.md 指示整读对应小节；对话模式经 search_knowledge_base 检索引用（可只取片段）。
+
 # 全文公共规则与固定论文骨架
 
 > 本模块由原 `mm-paper-writing/SKILL.md` 的 第30–60、84–117行 迁移而来。它是终稿写作的强制规范；不得只读摘要或以其它模块代替。

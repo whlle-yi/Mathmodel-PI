@@ -1,3 +1,5 @@
+> **知识层文件** · 主要使用方：mm-paper-writing（G-1 必读）、mm-figures（图件规范衔接）。工作流阶段按 SKILL.md 指示整读对应小节；对话模式经 search_knowledge_base 检索引用（可只取片段）。
+
 # 图表规范 playbook
 
 > **定位：语料证据**（28 篇统计与反例），不是操作规范；图表数量基线、标题格式、三线表、图表与正文呼应等执行规则以 `mm-paper-writing/SKILL.md`（"图表与格式"节）和 `mm-figures/SKILL.md`（"论文级数据图样式规范"节）为准，冲突时以操作规范为准。

@@ -1,3 +1,5 @@
+> **知识层文件** · 主要使用方：mm-paper-writing（G-1 必读）。工作流阶段按 SKILL.md 指示整读对应小节；对话模式经 search_knowledge_base 检索引用（可只取片段）。
+
 # 语言与措辞 playbook
 
 > **定位：语料证据**（措辞统计与示例），不是操作规范；去 AI 味与语言规范以 `mm-paper-writing/SKILL.md`（"语言自然化与去 AI 味"节）为准，冲突时以操作规范为准。

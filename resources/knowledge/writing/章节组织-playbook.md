@@ -1,3 +1,5 @@
+> **知识层文件** · 主要使用方：mm-paper-writing（G-1 必读）。工作流阶段按 SKILL.md 指示整读对应小节；对话模式经 search_knowledge_base 检索引用（可只取片段）。
+
 # 章节组织 playbook
 
 > **定位：语料证据**（章节骨架统计与反例），不是操作规范；章节结构、篇幅与各块写法以 `references/common-paper-rules.md`、`references/writing-order.json` 与 `references/chapters/` 对应章节文件为准，冲突时以操作规范为准。

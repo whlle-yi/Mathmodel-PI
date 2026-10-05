@@ -50,22 +50,22 @@ def load_registry() -> dict:
     paper_order = registry.get("paper_order")
     writing_order = registry.get("writing_order")
     expected_chapters = [
-        "references/chapters/00-摘要.md",
-        "references/chapters/01-问题重述.md",
-        "references/chapters/02-问题分析.md",
-        "references/chapters/03-模型假设.md",
-        "references/chapters/04-符号说明.md",
-        "references/chapters/05-模型的建立与求解.md",
-        "references/chapters/06-模型评价与推广.md",
-        "references/chapters/07-AI使用声明.md",
-        "references/chapters/08-参考文献.md",
-        "references/chapters/09-附录.md",
+        "../../knowledge/writing/chapters/00-摘要.md",
+        "../../knowledge/writing/chapters/01-问题重述.md",
+        "../../knowledge/writing/chapters/02-问题分析.md",
+        "../../knowledge/writing/chapters/03-模型假设.md",
+        "../../knowledge/writing/chapters/04-符号说明.md",
+        "../../knowledge/writing/chapters/05-模型的建立与求解.md",
+        "../../knowledge/writing/chapters/06-模型评价与推广.md",
+        "../../knowledge/writing/chapters/07-AI使用声明.md",
+        "../../knowledge/writing/chapters/08-参考文献.md",
+        "../../knowledge/writing/chapters/09-附录.md",
     ]
     if paper_order != expected_chapters:
         raise ValueError("paper_order must match the fixed ten-part paper order")
     if not isinstance(writing_order, list) or sorted(writing_order) != sorted(expected_chapters):
         raise ValueError("writing_order must contain each fixed chapter exactly once")
-    if writing_order[-1] != "references/chapters/00-摘要.md":
+    if writing_order[-1] != "../../knowledge/writing/chapters/00-摘要.md":
         raise ValueError("abstract must be last in writing_order")
     if registry.get("abstract_must_be_written_last") is not True:
         raise ValueError("abstract_must_be_written_last must be true")

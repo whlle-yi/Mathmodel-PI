@@ -7,7 +7,7 @@ description: 内置 BZD 数模模型字典的共享知识库与适配评估辅�
 
 内置 BZD 数模模型字典（5713 条模型记录），提供：① 候选模型的**知识档案**（适用场景/数据要求/关键假设/禁忌点/模型缺陷/检验方法）；② 已选模型的**适配性复核框架**（11 维 + 4 档判定）。
 
-**定位（关键，防错乱）**：本 skill 是**共享知识库 + 参考**，不是"选型依据"。**选哪个模型仍由 `mm-modeling` 依据 `references/model-selection-matrix.md` + `references/algorithm-catalog.md` 决定**；判型与候选池由 `mm-problem-analysis` 依据 `problem-taxonomy.md` + `model-selection-library.md` 决定。本 skill 只负责**查字典补充候选信息、复核某模型是否合题**，绝不替代上述两个选型依据。字典是学习交流版参考，非绝对权威；机理类模型（微分方程、复杂优化）若字典未收录，照常人工判断，不因"字典没有"而否决。
+**定位（关键，防错乱）**：本 skill 是**共享知识库 + 参考**，不是"选型依据"。**选哪个模型仍由 `mm-modeling` 依据 `../../knowledge/methods/model-selection-matrix.md` + `../../knowledge/methods/algorithm-catalog.md` 决定**；判型与候选池由 `mm-problem-analysis` 依据 `problem-taxonomy.md` + `model-selection-library.md` 决定。本 skill 只负责**查字典补充候选信息、复核某模型是否合题**，绝不替代上述两个选型依据。字典是学习交流版参考，非绝对权威；机理类模型（微分方程、复杂优化）若字典未收录，照常人工判断，不因"字典没有"而否决。
 
 ## 定位与产出
 
@@ -32,7 +32,7 @@ description: 内置 BZD 数模模型字典的共享知识库与适配评估辅�
 2. 运行 `python <mm-model-dictionary目录>/scripts/query_model_dictionary.py --model "<模型名>"`（精确已知时加 `--exact`，需控制返回数用 `--limit`）。**不要把 8.68MB 字典全部载入回复**。
 3. 对命中记录，比较名称/大类/具体分组/模型类别/适用场景/输入输出，选最相关的 1 条（同名可能用于不同场景，保留区分）。
 4. 输出该模型的 **知识档案表**：记录 ID、名称、大类、分组、类别、适用场景、数据要求、原理、输入、输出、关键假设、禁忌点、模型缺陷、检验方法、`资料使用声明`（原文保留）。
-5. （如需适配性复核）按 `references/model-dictionary-fit.md`（11 维中文版）逐项核对，给出最终 4 档判定：`合适` / `有条件合适` / `不合适` / `证据不足，待人工复核`；说明驱动判定的证据，不因"常用/高级"判合适。
+5. （如需适配性复核）按 `../../knowledge/methods/model-dictionary-fit.md`（11 维中文版）逐项核对，给出最终 4 档判定：`合适` / `有条件合适` / `不合适` / `证据不足，待人工复核`；说明驱动判定的证据，不因"常用/高级"判合适。
 
 ## 输出结构
 

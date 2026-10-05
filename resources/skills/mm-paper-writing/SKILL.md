@@ -27,12 +27,12 @@ description: CUMCM 论文撰写阶段。当用户需要撰写国赛数模论文�
 ## 必读模块
 
 - 流程、输入输出、初稿接管与 GATE：`references/workflow-and-gates.md`
-- 全文公共规则和固定论文骨架：`references/common-paper-rules.md`
-- 正文页数控制（27–30 页，篇幅不足怎么补/超出怎么减）：`references/篇幅控制-playbook.md`
-- 十个实际论文章节：`references/chapters/00-摘要.md` 至 `references/chapters/09-附录.md`
+- 全文公共规则和固定论文骨架：`../../knowledge/writing/common-paper-rules.md`
+- 正文页数控制（27–30 页，篇幅不足怎么补/超出怎么减）：`../../knowledge/writing/篇幅控制-playbook.md`
+- 十个实际论文章节：`../../knowledge/writing/chapters/00-摘要.md` 至 `../../knowledge/writing/chapters/09-附录.md`
 - 图表、公式、LaTeX、分页、编译和专项审计：`references/layout-and-compilation.md`
   - **硬性纪律**：凡使用 `longtable`，必须配齐 `\endfirsthead` / `\endhead` / `\endfoot` / `\endlastfoot` 四件套；续页标题必带原表号（`\thetable`，形如“续表 N　原表题”）；末页底线 `\bottomrule` 只允许一条并放在 `\endfoot` 与 `\endlastfoot` 之间的末页页脚段内，表末数据行后不得再写第二个 `\bottomrule`。缺任一即视为未实现跨页续表，`audit_paper_tables.py` 的 T-5b 将 FAIL。
-- 去 AI 味、技术保真、故事线和冷读：`references/language-and-storyline.md`
+- 去 AI 味、技术保真、故事线和冷读：`../../knowledge/writing/language-and-storyline.md`
 - 排版顺序、写作顺序、必读清单和章节重读映射：`references/writing-order.json`
 - 跨阶段共享策略与 manifest 契约：注册表列出的 `../mm-orchestrator/references/*` 文件。
 
