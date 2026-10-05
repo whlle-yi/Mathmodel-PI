@@ -67,7 +67,7 @@ type Listener = () => void;
 
 let nextId = 1;
 
-const state: AppState = {
+let state: AppState = {
   ready: false,
   settings: null,
   env: null,
@@ -87,8 +87,12 @@ const state: AppState = {
 
 const listeners = new Set<Listener>();
 
+/**
+ * 替换整个 state 对象（而非原地修改）。
+ * useSyncExternalStore 以引用相等判断是否重渲染，原地修改会导致 UI 永不更新。
+ */
 function setState(patch: Partial<AppState>): void {
-  Object.assign(state, patch);
+  state = { ...state, ...patch };
   for (const listener of listeners) listener();
 }
 
@@ -120,6 +124,7 @@ export const actions = {
       showOnboarding: !settings.onboardingDone,
     });
     window.api.onPipelineEvent(handleEvent);
+    console.info("[Mathmodel-PI] 初始化完成");
   },
 
   async openProject(projectPath: string): Promise<void> {

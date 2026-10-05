@@ -35,6 +35,18 @@ function createMainWindow(): BrowserWindow {
 
   win.on("ready-to-show", () => win.show());
 
+  // 渲染进程日志转发到终端，便于排查（仅 warning/error）
+  win.webContents.on("console-message", (event) => {
+    const detail = event as unknown as { level?: unknown; message?: string };
+    const level = typeof detail.level === "string" ? detail.level : String((event as unknown as { level: number }).level ?? "");
+    if (level === "error" || level === "warning" || level === "2" || level === "3") {
+      console.log(`[renderer:${level}] ${detail.message ?? ""}`);
+    }
+  });
+  win.webContents.on("preload-error", (_e, path, error) => {
+    console.error(`[preload-error] ${path}: ${error}`);
+  });
+
   // 外部链接一律走系统浏览器
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith("http")) shell.openExternal(url);
