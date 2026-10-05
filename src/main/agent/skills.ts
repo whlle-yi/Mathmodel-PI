@@ -1,6 +1,7 @@
 import { app } from "electron";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { SkillInfo } from "@shared/types";
 import { loadSettings } from "../settings";
 
@@ -11,10 +12,11 @@ import { loadSettings } from "../settings";
  * 所有 skills 经由 DefaultResourceLoader.skillsOverride 注入 pi 会话。
  */
 
-/** 内置 skills 目录（开发态为仓库 resources/skills，打包后为 <安装目录>/resources/skills） */
+/** 内置 skills 目录（打包后为 <安装目录>/resources/skills，开发态为项目 resources/skills） */
 export function bundledSkillsDir(): string {
   if (app.isPackaged) return join(process.resourcesPath, "skills");
-  return join(app.getAppPath(), "resources", "skills");
+  // 开发态主产物为 <项目根>/out/main/index.js
+  return join(fileURLToPath(new URL("../../resources", import.meta.url)), "skills");
 }
 
 interface RawSkill {

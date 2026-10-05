@@ -1,6 +1,7 @@
 import { app } from "electron";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import type { EnvReport } from "@shared/types";
 
@@ -10,10 +11,16 @@ import type { EnvReport } from "@shared/types";
  * 论文编译与 TikZ 渲染依赖 XeLaTeX（MiKTeX/TeX Live）与 pdftocairo（poppler）。
  */
 
+/** 应用资源目录（打包后 <安装>/resources；开发态为项目 resources/，由主模块位置反推） */
+function appResourcesDir(): string {
+  if (app.isPackaged) return process.resourcesPath;
+  // 开发态主产物为 <项目根>/out/main/index.js
+  return fileURLToPath(new URL("../../resources", import.meta.url));
+}
+
 /** 应用自带的便携 Python 根目录（打包后位于 resources/python） */
 export function bundledPythonDir(): string {
-  if (app.isPackaged) return join(process.resourcesPath, "python");
-  return join(app.getAppPath(), "resources", "python");
+  return join(appResourcesDir(), "python");
 }
 
 function bundledPythonExe(): string | null {
@@ -25,6 +32,7 @@ function bundledPythonExe(): string | null {
 function runCapture(cmd: string, args: string[], timeout = 20_000): Promise<{ ok: boolean; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
     execFile(cmd, args, { timeout, windowsHide: true, encoding: "utf-8" }, (err, stdout, stderr) => {
+      if (err) console.log(`[env] execFile ${cmd} 失败: ${err.message.split("\n")[0]}`);
       resolve({ ok: !err, stdout: stdout ?? "", stderr: stderr ?? "" });
     });
   });
@@ -56,9 +64,17 @@ export async function locateXelatex(): Promise<string | null> {
 
 async function locateOnPath(tool: string): Promise<string | null> {
   const where = await runCapture("where", [tool]);
-  if (where.ok) {
-    const first = where.stdout.split(/\r?\n/)[0]?.trim();
-    if (first && existsSync(first)) return first;
+  if (!where.ok) return null;
+  const candidates = where.stdout.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  // 常规可执行文件：existsSync 可识别
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
+  }
+  // Microsoft Store 应用执行别名（APPEXECLINK 重析点）无法被 existsSync 识别，
+  // 逐个试运行 --version 验证可用性
+  for (const candidate of candidates) {
+    const probe = await runCapture(candidate, ["--version"]);
+    if (probe.ok && (probe.stdout || probe.stderr).trim()) return candidate;
   }
   return null;
 }
@@ -71,9 +87,7 @@ export async function checkEnvironment(): Promise<EnvReport> {
   const bundled = bundledPythonExe();
   let pythonExe = bundled;
   let version: string | undefined;
-  let packages: Record<string, boolean> = {};
-
-  if (bundled) {
+  let packages: Record<string, boolean> = {};  if (bundled) {
     const v = await runCapture(bundled, ["--version"]);
     version = v.stdout.trim() || undefined;
   } else {
@@ -111,7 +125,7 @@ for m in ${JSON.stringify(REQUIRED_PACKAGES)}:
   // 3. pdftocairo（TikZ/SVG 渲染用；缺失仅为警告）
   const pdftocairoPath = await locateOnPath("pdftocairo");
 
-  return {
+  const report: EnvReport = {
     python: {
       found: Boolean(pythonExe),
       path: pythonExe ?? undefined,
@@ -129,6 +143,8 @@ for m in ${JSON.stringify(REQUIRED_PACKAGES)}:
       path: pdftocairoPath ?? undefined,
     },
   };
+  console.log("[env] 检测结果:", JSON.stringify(report));
+  return report;
 }
 
 /**
