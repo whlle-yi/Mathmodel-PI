@@ -1,8 +1,11 @@
 import type {
   AppSettings,
+  ChatMessage,
+  ChatSessionMeta,
   EnvReport,
   FileContent,
   FileTreeNode,
+  KbSource,
   ModelInfo,
   PipelineEvent,
   ProviderInfo,
@@ -21,6 +24,26 @@ export interface RunSnapshot {
   stages: StageInfo[];
 }
 
+/** 对话事件（主进程 → 渲染进程，均带会话 id） */
+export type ChatEvent =
+  | { type: "user"; sessionId: string; text: string; ts: number }
+  | { type: "assistant"; sessionId: string; text: string; ts: number }
+  | { type: "info"; sessionId: string; text: string; ts: number }
+  | { type: "text"; sessionId: string; delta: string }
+  | { type: "tool"; sessionId: string; callId: string; name: string; status: "start" | "done"; argsPreview?: string; resultPreview?: string; ok?: boolean }
+  | { type: "busy"; sessionId: string; busy: boolean }
+  | { type: "sessions"; sessions: ChatSessionMeta[] };
+
+/** 持久化转录行（含工具行） */
+export interface ChatLine extends ChatMessage {
+  kind?: "tool";
+  toolName?: string;
+  toolStatus?: "start" | "done";
+  argsPreview?: string;
+  resultPreview?: string;
+  ok?: boolean;
+}
+
 export interface Api {
   // 设置与环境
   getSettings(): Promise<AppSettings>;
@@ -33,7 +56,22 @@ export interface Api {
   listSkills(): Promise<SkillInfo[]>;
   importSkillsDir(): Promise<{ dir: string; count: number } | null>;
 
-  // 项目管理
+  // 对话（主界面）
+  listChatSessions(): Promise<ChatSessionMeta[]>;
+  createChatSession(cwd?: string): Promise<ChatSessionMeta>;
+  deleteChatSession(id: string): Promise<void>;
+  getChatTranscript(id: string): Promise<ChatLine[]>;
+  chatSend(id: string, text: string): Promise<void>;
+  chatAbort(id: string): Promise<void>;
+  isChatBusy(id: string): Promise<boolean>;
+
+  // 知识库
+  kbList(): Promise<KbSource[]>;
+  kbSelectPath(): Promise<string | null>;
+  kbImportPath(path: string): Promise<{ source: KbSource; files: number }>;
+  kbDeleteSource(id: string): Promise<void>;
+
+  // 项目管理（工作流视图）
   selectDirectory(): Promise<string | null>;
   selectProblemFile(): Promise<string | null>;
   createProject(parentDir: string, name: string): Promise<{ path: string }>;
@@ -42,7 +80,7 @@ export interface Api {
   readFile(path: string): Promise<FileContent>;
   openPath(path: string): Promise<void>;
 
-  // 流水线执行
+  // 流水线执行（工作流视图）
   startRun(opts: RunOptions): Promise<void>;
   runStage(projectPath: string, stageKey: string, model: string): Promise<void>;
   abortRun(): Promise<void>;
@@ -51,6 +89,7 @@ export interface Api {
 
   // 执行流事件
   onPipelineEvent(listener: (event: PipelineEvent) => void): () => void;
+  onChatEvent(listener: (event: ChatEvent) => void): () => void;
 
   // 应用信息
   appVersion(): Promise<string>;

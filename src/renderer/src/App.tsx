@@ -1,17 +1,15 @@
 import { useEffect } from "react";
 import { actions, useApp } from "./store";
-import { Header } from "./components/Header";
-import { PipelineStrip } from "./components/PipelineStrip";
-import { StreamView } from "./components/StreamView";
-import { PreviewPane } from "./components/PreviewPane";
-import { NewRunModal } from "./components/NewRunModal";
+import { Sidebar } from "./components/Sidebar";
+import { ChatView } from "./components/ChatView";
+import { WorkflowView } from "./components/WorkflowView";
 import { SettingsModal } from "./components/SettingsModal";
 import { OnboardingModal } from "./components/OnboardingModal";
 import { AskDialog } from "./components/AskDialog";
 
 /**
- * 工作台主布局：顶栏（项目与运行控制）→ 流水线阶段条 →
- * 执行流（左）+ 产物预览（右），模态层承载运行表单 / 设置 / 引导 / 提问。
+ * 应用外壳：左侧会话栏 + 主区（对话视图 / 数模工作流视图）。
+ * 对话是默认主界面；完整工作流经侧栏按钮进入，为独立子功能。
  */
 export default function App(): React.ReactNode {
   const app = useApp();
@@ -25,15 +23,10 @@ export default function App(): React.ReactNode {
   }
 
   return (
-    <div className="workbench">
-      <Header />
-      <PipelineStrip />
-      <main className="main-split">
-        <StreamView />
-        <PreviewPane />
-      </main>
+    <div className="app-shell">
+      <Sidebar />
+      {app.view === "chat" ? <ChatView /> : <WorkflowView />}
 
-      {app.showNewRun && <NewRunModal />}
       {app.showSettings && <SettingsModal />}
       {app.showOnboarding && <OnboardingModal />}
       {app.ask && <AskDialog />}

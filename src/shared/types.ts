@@ -140,6 +140,8 @@ export interface AppSettings {
   recentProjects: string[];
   /** 首次引导是否完成 */
   onboardingDone: boolean;
+  /** 对话/项目的工作区目录（用户指定；默认在 D 盘根目录创建） */
+  workspaceDir: string;
 }
 
 /** 预览文件类型 */
@@ -154,4 +156,40 @@ export interface FileContent {
   size: number;
   /** 是否因过大而截断 */
   truncated: boolean;
+}
+
+// ============================================================
+// 对话（主界面）
+// ============================================================
+
+/** 一次对话会话的元信息 */
+export interface ChatSessionMeta {
+  id: string;
+  /** 标题（默认取首条消息截断） */
+  title: string;
+  createdAt: number;
+  updatedAt: number;
+  /** 该会话智能体的工作目录 */
+  cwd: string;
+  messageCount: number;
+}
+
+/** 会话历史中的一条消息（持久化与重载用） */
+export interface ChatMessage {
+  id: number;
+  role: "user" | "assistant" | "info";
+  text: string;
+  ts: number;
+}
+
+/** 知识库来源条目 */
+export interface KbSource {
+  id: string;
+  /** 来源名（文件名或目录名） */
+  name: string;
+  path: string;
+  /** 切块数量 */
+  chunks: number;
+  /** 索引时间 */
+  indexedAt: number;
 }

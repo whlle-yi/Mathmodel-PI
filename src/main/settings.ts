@@ -16,6 +16,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   skillDirs: [],
   recentProjects: [],
   onboardingDone: false,
+  workspaceDir: "D:\\Mathmodel-PI-Workspace",
 };
 
 let cached: AppSettings | null = null;
@@ -32,7 +33,16 @@ export function loadSettings(): AppSettings {
   } catch {
     cached = { ...DEFAULT_SETTINGS };
   }
-  return cached as AppSettings;
+  // 工作区目录兜底：不存在则自动创建（D 盘不可用时退回用户目录）
+  const ws = cached as AppSettings;
+  if (!ws.workspaceDir) ws.workspaceDir = DEFAULT_SETTINGS.workspaceDir;
+  try {
+    mkdirSync(ws.workspaceDir, { recursive: true });
+  } catch {
+    ws.workspaceDir = join(app.getPath("home"), "Mathmodel-PI-Workspace");
+    mkdirSync(ws.workspaceDir, { recursive: true });
+  }
+  return ws;
 }
 
 export function saveSettings(patch: Partial<AppSettings>): AppSettings {

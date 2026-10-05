@@ -15,6 +15,7 @@ import { join } from "node:path";
 import type { RunOptions, ThinkingLevel } from "@shared/types";
 import { loadSettings } from "../settings";
 import { bundledSkillsDir } from "./skills";
+import { kbSearch } from "../knowledge/kb";
 
 /**
  * pi 会话工厂。
@@ -76,6 +77,39 @@ function makeAskUserExtension(ctx: AskUserContext) {
   };
 }
 
+/** search_knowledge_base：在用户导入的本地知识库中检索相关片段 */
+function makeKnowledgeBaseExtension() {
+  return (pi: ExtensionAPI) => {
+    pi.registerTool({
+      name: "search_knowledge_base",
+      label: "检索知识库",
+      description:
+        "在本地知识库（内置数学建模知识 + 用户导入的论文/教材/笔记）中检索与查询最相关的文本片段，返回带来源标注的结果。回答专业问题、核对竞赛规范、选择模型方法之前都应先检索。",
+      parameters: Type.Object({
+        query: Type.String({ description: "检索关键词或问题描述" }),
+        top_k: Type.Optional(Type.Number({ description: "返回条数，默认 5" })),
+      }),
+      executionMode: "sequential",
+      execute: async (_toolCallId, params) => {
+        const results = kbSearch(params.query, params.top_k ?? 5);
+        if (results.length === 0) {
+          return {
+            content: [{ type: "text", text: "知识库中没有相关内容。可提示用户在 设置 → 知识库 中导入资料。" }],
+            details: { count: 0 },
+          };
+        }
+        const text = results
+          .map((r, i) => `[${i + 1}] 来源：${r.source}（${r.path}）\n${r.text}`)
+          .join("\n\n---\n\n");
+        return {
+          content: [{ type: "text", text }],
+          details: { count: results.length },
+        };
+      },
+    });
+  };
+}
+
 export interface CreateMMSessionOptions {
   cwd: string;
   askCtx: AskUserContext;
@@ -85,6 +119,10 @@ export interface CreateMMSessionOptions {
   /** 模型，格式 "provider/model"；缺省时用设置中的默认模型 */
   model?: string;
   thinkingLevel?: ThinkingLevel;
+  /** 注册 search_knowledge_base 检索工具（对话与工作流会话均可用） */
+  knowledgeBase?: boolean;
+  /** 不注入的 skill 名单（如对话场景屏蔽 mm-orchestrator） */
+  excludeSkills?: string[];
 }
 
 export async function createMMSession(opts: CreateMMSessionOptions): Promise<AgentSession> {
@@ -115,16 +153,20 @@ export async function createMMSession(opts: CreateMMSessionOptions): Promise<Age
   for (const root of roots) {
     const { skills } = await loadSkillsFromDir({ dir: root.dir, source: root.source });
     for (const skill of skills) {
+      if (opts.excludeSkills?.includes(skill.name)) continue;
       if (!merged.has(skill.name)) merged.set(skill.name, skill);
     }
   }
   const allSkills = [...merged.values()];
 
+  const factories = [makeAskUserExtension(opts.askCtx)];
+  if (opts.knowledgeBase) factories.push(makeKnowledgeBaseExtension());
+
   const resourceLoader = new DefaultResourceLoader({
     cwd: opts.cwd,
     agentDir,
     skillsOverride: () => ({ skills: allSkills, diagnostics: [] }),
-    extensionFactories: [makeAskUserExtension(opts.askCtx)],
+    extensionFactories: factories,
   });
   await resourceLoader.reload();
 

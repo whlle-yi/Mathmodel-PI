@@ -74,8 +74,8 @@ mkdirSync(DEST, { recursive: true });
 execFileSync("tar", ["-xzf", tmp, "-C", DEST, "--strip-components=1"]);
 rmSync(tmp, { force: true });
 
-console.log("安装核心科学计算库（numpy/pandas/scipy/matplotlib/pymupdf/openpyxl）…");
+console.log("安装核心科学计算库（numpy/pandas/scipy/matplotlib/pymupdf/openpyxl/python-docx）…");
 execFileSync(join(DEST, "python.exe"), ["-m", "pip", "install", "--no-warn-script-location",
-  "numpy", "pandas", "scipy", "matplotlib", "pymupdf", "openpyxl"], { stdio: "inherit" });
+  "numpy", "pandas", "scipy", "matplotlib", "pymupdf", "openpyxl", "python-docx"], { stdio: "inherit" });
 
 console.log(`完成：${DEST}`);

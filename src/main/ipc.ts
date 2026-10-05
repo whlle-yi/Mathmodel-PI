@@ -1,10 +1,13 @@
-import { app, ipcMain, BrowserWindow } from "electron";
+import { app, dialog, ipcMain, BrowserWindow } from "electron";
 import { ModelRuntime } from "@earendil-works/pi-coding-agent";
+import type { ChatEvent, ChatLine } from "@shared/api";
 import type {
   AppSettings,
+  ChatSessionMeta,
   EnvReport,
   FileContent,
   FileTreeNode,
+  KbSource,
   ModelInfo,
   PipelineEvent,
   RunOptions,
@@ -16,6 +19,8 @@ import { PROVIDERS } from "./providers";
 import { isStageKey } from "@shared/stages";
 import { collectSkills } from "./agent/skills";
 import { PipelineRunner } from "./agent/pipeline";
+import { ChatService } from "./agent/chat";
+import * as kb from "./knowledge/kb";
 import {
   buildFileTree,
   createProject,
@@ -29,7 +34,7 @@ import { registerAllowedRoot } from "./protocol";
 
 /**
  * IPC 接口层：渲染进程的全部能力请求都经由这里进入主进程。
- * 事件方向（流水线执行流）通过 webContents.send 推送。
+ * 事件方向（流水线执行流 / 对话流）通过 webContents.send 推送。
  */
 
 const runner = new PipelineRunner({
@@ -38,6 +43,12 @@ const runner = new PipelineRunner({
       win.webContents.send("pipeline:event", event);
     }
   },
+});
+
+const chat = new ChatService((event: ChatEvent) => {
+  for (const win of BrowserWindow.getAllWindows()) {
+    win.webContents.send("chat:event", event);
+  }
 });
 
 /** 将项目根目录登记为 mmfile:// 可访问范围（图片/PDF 预览） */
@@ -120,6 +131,35 @@ export function registerIpcHandlers(): void {
   ipcMain.handle("run:abort", () => runner.abort());
   ipcMain.handle("run:answer", (_e, id: string, answer: string) => runner.answer(id, answer));
   ipcMain.handle("run:snapshot", () => runner.snapshot());
+
+  // ---- 对话（主界面） ------------------------------------------------------
+  ipcMain.handle("chat:list", (): ChatSessionMeta[] => chat.listSessions());
+  ipcMain.handle("chat:create", (_e, cwd?: string): ChatSessionMeta => {
+    const session = chat.createSession(cwd ?? loadSettings().workspaceDir);
+    registerAllowedRoot(session.cwd);
+    return session;
+  });
+  ipcMain.handle("chat:delete", (_e, id: string) => chat.deleteSession(id));
+  ipcMain.handle("chat:transcript", (_e, id: string): ChatLine[] => chat.getTranscript(id));
+  ipcMain.handle("chat:send", async (_e, id: string, text: string) => {
+    const meta = chat.listSessions().find((s) => s.id === id);
+    if (meta) registerAllowedRoot(meta.cwd);
+    await chat.send(id, text);
+  });
+  ipcMain.handle("chat:abort", (_e, id: string) => chat.abort(id));
+  ipcMain.handle("chat:busy", (_e, id: string) => chat.isBusy(id));
+
+  // ---- 知识库 --------------------------------------------------------------
+  ipcMain.handle("kb:list", (): KbSource[] => kb.kbSources());
+  ipcMain.handle("kb:import", async (_e, path: string) => kb.kbImport(path));
+  ipcMain.handle("kb:delete", (_e, id: string) => kb.kbDelete(id));
+  ipcMain.handle("kb:selectPath", async (): Promise<string | null> => {
+    const result = await dialog.showOpenDialog({
+      properties: ["openDirectory", "openFile", "multiSelections"],
+      filters: [{ name: "资料", extensions: ["pdf", "docx", "md", "txt"] }],
+    });
+    return result.canceled ? null : result.filePaths[0];
+  });
 
   // ---- 应用信息 ----------------------------------------------------------
   ipcMain.handle("app:version", () => app.getVersion());

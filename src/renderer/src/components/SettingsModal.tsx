@@ -1,21 +1,25 @@
 import { useEffect, useState } from "react";
-import type { ModelInfo, ProviderInfo, SkillInfo } from "@shared/types";
+import type { KbSource, ModelInfo, ProviderInfo, SkillInfo } from "@shared/types";
 import { actions, useApp } from "../store";
 
-/** 设置：模型接入（多 provider API Key + 默认模型）、Skills 管理、环境信息 */
+/** 设置：模型接入、知识库、Skills 管理、环境与工作区 */
 export function SettingsModal(): React.ReactNode {
   const app = useApp();
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [skills, setSkills] = useState<SkillInfo[]>([]);
+  const [kb, setKb] = useState<KbSource[]>([]);
   const [keys, setKeys] = useState<Record<string, string>>(app.settings?.providers ?? {});
   const [defaultModel, setDefaultModel] = useState(app.settings?.defaultModel ?? "");
   const [thinkingLevel, setThinkingLevel] = useState(app.settings?.thinkingLevel ?? "medium");
   const [saved, setSaved] = useState(false);
+  const [kbBusy, setKbBusy] = useState(false);
+  const [kbMsg, setKbMsg] = useState("");
 
   useEffect(() => {
     void window.api.listProviders().then(setProviders);
     void window.api.listSkills().then(setSkills);
+    void window.api.kbList().then(setKb);
   }, []);
 
   useEffect(() => {
@@ -29,6 +33,7 @@ export function SettingsModal(): React.ReactNode {
       providers: cleaned,
       defaultModel: defaultModel || undefined,
       thinkingLevel,
+      workspaceDir: app.settings?.workspaceDir,
     });
     setKeys(cleaned);
     setSaved(true);
@@ -38,6 +43,23 @@ export function SettingsModal(): React.ReactNode {
   async function importDir(): Promise<void> {
     const result = await window.api.importSkillsDir();
     if (result) setSkills(await window.api.listSkills());
+  }
+
+  async function kbImport(): Promise<void> {
+    setKbBusy(true);
+    setKbMsg("");
+    try {
+      const path = await window.api.kbSelectPath();
+      if (path) {
+        const { source, files } = await window.api.kbImportPath(path);
+        setKb(await window.api.kbList());
+        setKbMsg(`已导入「${source.name}」：${files} 个文件，${source.chunks} 个片段`);
+      }
+    } catch (err) {
+      setKbMsg(`导入失败：${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setKbBusy(false);
+    }
   }
 
   return (
@@ -95,6 +117,37 @@ export function SettingsModal(): React.ReactNode {
         </section>
 
         <section className="settings-section">
+          <h3>知识库</h3>
+          <p className="muted tiny">
+            导入往届论文、教材、笔记等资料（PDF/DOCX/MD/TXT），智能体对话与工作流都会自动检索引用。
+            全部索引仅保存在本机。
+          </p>
+          <div className="skills-list">
+            {kb.length === 0 && <div className="muted tiny pad">尚未导入资料</div>}
+            {kb.map((s) => (
+              <div key={s.id} className="skill-row" title={s.path}>
+                <b>{s.name}</b>
+                <span className="muted">{s.chunks} 个片段</span>
+                <button
+                  className="btn tiny ghost"
+                  onClick={() => {
+                    void window.api.kbDeleteSource(s.id).then(() => window.api.kbList().then(setKb));
+                  }}
+                >
+                  删除
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="form-inline">
+            <button className="btn ghost" disabled={kbBusy} onClick={() => void kbImport()}>
+              {kbBusy ? "索引中…" : "导入资料"}
+            </button>
+            {kbMsg && <span className="muted tiny">{kbMsg}</span>}
+          </div>
+        </section>
+
+        <section className="settings-section">
           <h3>建模 Skills</h3>
           <p className="muted tiny">应用内置了最新版工作流 skills；你也可以导入其他 skills 目录（导入的同名 skill 不会覆盖内置项）。</p>
           <div className="skills-list">
@@ -114,6 +167,18 @@ export function SettingsModal(): React.ReactNode {
         <section className="settings-section">
           <h3>本地环境</h3>
           <div className="env-report">
+            <div>
+              工作区目录：{app.settings?.workspaceDir}
+              <button
+                className="btn tiny ghost"
+                style={{ marginLeft: 8 }}
+                onClick={() => void window.api.selectDirectory().then((dir) => {
+                  if (dir) void window.api.setSettings({ workspaceDir: dir }).then((s) => actions.setState({ settings: s }));
+                })}
+              >
+                更改
+              </button>
+            </div>
             <div>
               Python：{app.env?.python.found ? `✓ ${app.env.python.path}` : "✗ 未检测到"}
               {app.env?.python.found && !app.env.python.bundled && "（来自系统，建议保持已安装 numpy/pandas 等库）"}
