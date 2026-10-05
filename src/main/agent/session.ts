@@ -11,6 +11,8 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { app } from "electron";
+import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { join } from "node:path";
 import type { RunOptions, ThinkingLevel } from "@shared/types";
 import { loadSettings } from "../settings";
@@ -142,22 +144,41 @@ export async function createMMSession(opts: CreateMMSessionOptions): Promise<Age
     if (!model) opts.onLog?.(`未找到模型 ${modelId}，回退到默认模型`);
   }
 
-  // 2. 资源加载：skills 全部来自应用内置与用户导入目录；
-  //    agentDir 指向应用私有目录，避免读取用户全局 pi 配置
+  // 2. 资源加载：skills 与指令按作用域合并
+  //    优先级（同名就近覆盖）：项目 .mp > 全局 .mp > 设置导入 > 应用内置
   const agentDir = join(app.getPath("userData"), "pi-agent");
-  const merged = new Map<string, Skill>();
-  const roots: Array<{ dir: string; source: string }> = [
-    { dir: bundledSkillsDir(), source: "builtin" },
-    ...settings.skillDirs.map((d) => ({ dir: d, source: "imported" })),
+  const globalMp = join(homedir(), ".mp");
+  const projectMp = join(opts.cwd, ".mp");
+
+  const skillRoots: string[] = [
+    bundledSkillsDir(),
+    ...settings.skillDirs,
+    join(globalMp, "skills"),
+    join(projectMp, "skills"),
   ];
-  for (const root of roots) {
-    const { skills } = await loadSkillsFromDir({ dir: root.dir, source: root.source });
+  const merged = new Map<string, Skill>();
+  for (const [i, dir] of skillRoots.entries()) {
+    if (!existsSync(dir)) continue;
+    const { skills } = await loadSkillsFromDir({ dir, source: i === 0 ? "builtin" : i === skillRoots.length - 1 ? "project" : "user" });
     for (const skill of skills) {
       if (opts.excludeSkills?.includes(skill.name)) continue;
-      if (!merged.has(skill.name)) merged.set(skill.name, skill);
+      merged.set(skill.name, skill); // 后加载的作用域覆盖先前的同名项
     }
   }
   const allSkills = [...merged.values()];
+
+  // 指令文件：全局 ~/.mp/AGENTS.md + 项目 <cwd>/.mp/AGENTS.md（存在才注入）
+  const instructionFiles: Array<{ path: string; content: string }> = [];
+  for (const file of [join(globalMp, "AGENTS.md"), join(projectMp, "AGENTS.md")]) {
+    if (existsSync(file)) {
+      try {
+        const content = readFileSync(file, "utf-8").trim();
+        if (content) instructionFiles.push({ path: file, content });
+      } catch {
+        // 读不到就跳过
+      }
+    }
+  }
 
   const factories = [makeAskUserExtension(opts.askCtx)];
   if (opts.knowledgeBase) factories.push(makeKnowledgeBaseExtension());
@@ -166,6 +187,9 @@ export async function createMMSession(opts: CreateMMSessionOptions): Promise<Age
     cwd: opts.cwd,
     agentDir,
     skillsOverride: () => ({ skills: allSkills, diagnostics: [] }),
+    agentsFilesOverride: (current) => ({
+      agentsFiles: [...current.agentsFiles, ...instructionFiles],
+    }),
     extensionFactories: factories,
   });
   await resourceLoader.reload();
