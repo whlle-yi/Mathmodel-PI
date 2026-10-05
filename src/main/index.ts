@@ -21,7 +21,7 @@ function createMainWindow(): BrowserWindow {
     minWidth: 1100,
     minHeight: 700,
     show: false,
-    backgroundColor: "#101418",
+    backgroundColor: "#f5f7fa",
     autoHideMenuBar: true,
     title: "Mathmodel-PI",
     webPreferences: {

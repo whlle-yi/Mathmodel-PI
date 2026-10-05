@@ -1,20 +1,20 @@
 /* ============================================================
    Mathmodel-PI 工作台样式
-   深色工程主题；CSS 变量集中于 :root，组件不写死颜色。
+   浅色工程主题；CSS 变量集中于 :root，组件不写死颜色。
    ============================================================ */
 
 :root {
-  --bg: #101418;
-  --bg-raised: #171c22;
-  --bg-panel: #1b2229;
-  --border: #2a333d;
-  --text: #dde5ec;
-  --text-muted: #8a97a3;
-  --accent: #4f8cff;
-  --accent-strong: #2f6fe0;
-  --ok: #3fb27f;
-  --warn: #d9a13c;
-  --danger: #e06c5f;
+  --bg: #f5f7fa;
+  --bg-raised: #ffffff;
+  --bg-panel: #eef2f6;
+  --border: #d7dee6;
+  --text: #1f2937;
+  --text-muted: #6b7684;
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --ok: #16a34a;
+  --warn: #d97706;
+  --danger: #dc2626;
   --font: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
   --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
 }
@@ -98,7 +98,7 @@ html, body, #root {
 }
 .btn:hover { border-color: var(--accent); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn.primary { background: var(--accent-strong); border-color: var(--accent-strong); }
+.btn.primary { background: var(--accent-strong); border-color: var(--accent-strong); color: #fff; }
 .btn.primary:hover:not(:disabled) { background: var(--accent); }
 .btn.danger { background: transparent; border-color: var(--danger); color: var(--danger); }
 .btn.ghost { background: transparent; }
@@ -148,7 +148,7 @@ html, body, #root {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 10px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.14);
 }
 
 .pop-row { display: flex; gap: 8px; margin-bottom: 8px; }
@@ -218,8 +218,8 @@ html, body, #root {
 .stage-chip.status-n_a { opacity: 0.45; }
 
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(79, 140, 255, 0.35); }
-  50% { box-shadow: 0 0 0 5px rgba(79, 140, 255, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.25); }
+  50% { box-shadow: 0 0 0 5px rgba(37, 99, 235, 0); }
 }
 
 .stage-arrow { width: 18px; height: 1px; background: var(--border); }
@@ -393,7 +393,7 @@ html, body, #root {
 .modal-mask {
   position: fixed;
   inset: 0;
-  background: rgba(5, 8, 12, 0.66);
+  background: rgba(15, 23, 42, 0.42);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -409,7 +409,7 @@ html, body, #root {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 22px 26px;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 12px 48px rgba(15, 23, 42, 0.18);
 }
 .modal.wide { width: 780px; }
 .modal.small { width: 480px; }
