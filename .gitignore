@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+out/
+dist/
+
+# Portable Python runtime (fetched by `npm run fetch-python`)
+resources/python/
+
+# Logs
+*.log
+logs/
+
+# Editor & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Environment & secrets
+.env
+.env.local
+*.tsbuildinfo

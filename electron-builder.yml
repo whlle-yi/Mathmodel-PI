@@ -1,0 +1,41 @@
+appId: io.github.whlle-yi.mathmodel-pi
+productName: Mathmodel-PI
+copyright: Copyright © 2026 whlle-yi
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - out/**
+  - package.json
+
+# pi 智能体运行时与内置 skills 随应用分发
+extraResources:
+  - from: resources/skills
+    to: skills
+  - from: resources/python
+    to: python
+    filter:
+      - "**/*"
+      - "!**/__pycache__/**"
+
+asar: true
+asarUnpack:
+  - "resources/**"
+  - "**/node_modules/@earendil-works/**"
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: build/icon.png
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  shortcutName: Mathmodel-PI
+
+npmRebuild: false
