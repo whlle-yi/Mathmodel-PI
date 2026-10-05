@@ -79,9 +79,6 @@ export function ChatView(): React.ReactNode {
             )}
           </span>
         )}
-        <span className="muted tiny" style={{ marginLeft: "auto" }}>
-          {app.env?.python.found ? "Python ✓" : "Python ✗"} · {app.env?.xelatex.found ? "XeLaTeX ✓" : "XeLaTeX ⚠"}
-        </span>
       </header>
 
       <div className="chat-scroll">
