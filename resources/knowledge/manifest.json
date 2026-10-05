@@ -1,0 +1,15 @@
+{
+  "$comment": "内置知识索引清单。include：参与检索索引的文件（相对 resources/）；exclude：强结构的规则文件/大 JSON，走整读或专用脚本通道，绝不切块。",
+  "version": 1,
+  "include": [
+    "knowledge/**/*.md",
+    "knowledge/**/*.txt",
+    "skills/*/references/**/*.md",
+    "skills/*/references/**/*.txt"
+  ],
+  "exclude": [
+    "skills/mm-model-dictionary/**",
+    "knowledge/manifest.json",
+    "knowledge/README.md"
+  ]
+}

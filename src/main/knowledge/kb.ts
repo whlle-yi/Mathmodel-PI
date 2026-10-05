@@ -15,6 +15,7 @@ import type { KbSource } from "@shared/types";
  */
 
 interface Chunk {
+  origin: "builtin" | "user";
   sourceId: string;
   sourceName: string;
   path: string;
@@ -28,6 +29,7 @@ interface Db {
 }
 
 let cache: Db | null = null;
+let builtinChunks: Chunk[] | null = null;
 
 function kbDir(): string {
   const dir = join(app.getPath("userData"), "kb");
@@ -64,7 +66,7 @@ function openDb(): Db {
   }>;
   cache = {
     db,
-    chunks: chunkRows.map((r) => ({ sourceId: r.source_id, sourceName: r.source_name, path: r.path, text: r.text })),
+    chunks: chunkRows.map((r) => ({ origin: "user" as const, sourceId: r.source_id, sourceName: r.source_name, path: r.path, text: r.text })),
     sources: sourceRows.map((r) => ({ id: r.id, name: r.name, path: r.path, chunks: r.chunks, indexedAt: r.indexed_at })),
   };
   return cache;
@@ -146,6 +148,34 @@ function chunkText(text: string): string[] {
   return chunks.filter((c) => c.trim().length > 20);
 }
 
+/**
+ * 内置知识索引（构建产物 resources/kb-index/builtin.sqlite3，只读）。
+ * 与用户索引分离：内置库随软件分发，标记 origin=builtin。
+ */
+function loadBuiltinChunks(): Chunk[] {
+  if (builtinChunks) return builtinChunks;
+  builtinChunks = [];
+  try {
+    const file = join(appResources(), "kb-index", "builtin.sqlite3");
+    if (!existsSync(file)) return builtinChunks;
+    const db = new DatabaseSync(file, { readOnly: true });
+    const rows = db.prepare("SELECT source_name, path, text FROM chunks").all() as Array<{
+      source_name: string; path: string; text: string;
+    }>;
+    builtinChunks = rows.map((r) => ({
+      origin: "builtin" as const,
+      sourceId: "builtin",
+      sourceName: r.source_name,
+      path: r.path,
+      text: r.text,
+    }));
+    db.close();
+  } catch (err) {
+    console.warn("[kb] 内置索引加载失败:", err instanceof Error ? err.message : err);
+  }
+  return builtinChunks;
+}
+
 // ---------------------------------------------------------------- 检索
 
 /** 分词：拉丁词 + 中文字符二元（bigram） */
@@ -210,7 +240,7 @@ export async function kbImport(target: string): Promise<{ source: KbSource; file
   for (const { path, text } of texts) {
     for (const chunk of chunkText(text)) {
       insert.run(id, name, path, chunk);
-      db.chunks.push({ sourceId: id, sourceName: name, path, text: chunk });
+      db.chunks.push({ origin: "user", sourceId: id, sourceName: name, path, text: chunk });
       count += 1;
     }
   }
@@ -229,14 +259,16 @@ export function kbDelete(sourceId: string): void {
   db.sources = db.sources.filter((s) => s.id !== sourceId);
 }
 
-/** 供 search_knowledge_base 工具调用；返回带来源标注的文本块 */
-export function kbSearch(query: string, k = 5): Array<{ text: string; source: string; path: string }> {
+/** 供 search_knowledge_base 工具调用：合并内置知识与用户资料两层，标注来源 */
+export function kbSearch(query: string, k = 5): Array<{ text: string; source: string; path: string; origin: "builtin" | "user" }> {
   const db = openDb();
-  if (db.chunks.length === 0) return [];
-  return bm25Search(query, db.chunks, k).map((c) => ({
+  const all = [...loadBuiltinChunks(), ...db.chunks];
+  if (all.length === 0) return [];
+  return bm25Search(query, all, k).map((c) => ({
     text: c.text,
     source: c.sourceName,
     path: c.path,
+    origin: c.origin,
   }));
 }
 

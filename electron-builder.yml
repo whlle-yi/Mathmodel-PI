@@ -16,6 +16,10 @@ extraResources:
     to: skills
   - from: resources/kb
     to: kb
+  - from: resources/kb-index
+    to: kb-index
+  - from: resources/knowledge
+    to: knowledge
   - from: resources/python
     to: python
     filter:

@@ -101,7 +101,10 @@ function makeKnowledgeBaseExtension() {
           };
         }
         const text = results
-          .map((r, i) => `[${i + 1}] 来源：${r.source}（${r.path}）\n${r.text}`)
+          .map((r, i) => {
+            const origin = r.origin === "builtin" ? "内置知识" : "用户资料";
+            return `[${i + 1}] 来源：${origin} · ${r.source}（${r.path}）\n${r.text}`;
+          })
           .join("\n\n---\n\n");
         return {
           content: [{ type: "text", text }],
